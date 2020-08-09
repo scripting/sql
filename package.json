@@ -1,0 +1,19 @@
+{
+	"name": "davesql",
+	"description": "A simplified interface to run SQL code in my projects.",
+	"author": "Dave Winer <dave.winer@gmail.com>",
+	"version": "0.4.0",
+	"main": "davesql.js",
+	"files": [
+		"davesql.js"
+		],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/scripting/sql.git"
+		},
+	"dependencies" : {
+		"daveutils": "*",
+		"dateformat": "*",
+		"mysql": "*"
+		}
+	}
