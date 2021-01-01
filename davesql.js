@@ -1,9 +1,11 @@
-const myProductName = "davesql", myVersion = "0.4.1"; 
+const myProductName = "davesql", myVersion = "0.4.11"; 
 
 exports.runSqltext = runSqltext; 
 exports.queueQuery = queueQuery; 
+exports.getQueueLength = getQueueLength;  //11/21/20 by DW
 exports.encodeValues = encodeValues; 
 exports.encode = encode; 
+exports.formatDateTime = formatDateTime; //12/18/20 by DW
 exports.start = start; 
 
 const mysql = require ("mysql");
@@ -43,7 +45,7 @@ function encodeValues (values) {
 function runSqltext (s, callback) {
 	theSqlConnectionPool.getConnection (function (err, connection) {
 		if (err) {
-			console.log ("runSqltext: err.code == " + err.code + ", err.message == " + err.message);
+			console.log ("runSqltext: err.code == " + err.code + ", err.message == " + err.message + ", sqltext == " + s);
 			if (callback !== undefined) {
 				callback (err);
 				}
@@ -52,7 +54,7 @@ function runSqltext (s, callback) {
 			connection.query (s, function (err, result) {
 				connection.release ();
 				if (err) {
-					console.log ("runSqltext: err.code == " + err.code + ", err.message == " + err.message);
+					console.log ("runSqltext: err.code == " + err.code + ", err.message == " + err.message + ", sqltext == " + s);
 					if (callback !== undefined) {
 						callback (err);
 						}
@@ -84,13 +86,22 @@ function checkQueryQueue () {
 			}
 		}
 	}
+function getQueueLength () { //11/21/20 by DW -- used in the OPML tags app
+	return (sqlQueue.length);
+	}
 function startQueryQueue () {
-	setInterval (checkQueryQueue, 100); //every tenth second
+	setInterval (checkQueryQueue, config.millisecsBetwQueueRuns); //every tenth second
 	}
 
 function start (options, callback) {
 	theSqlConnectionPool = mysql.createPool (options);
 	config = options; //keep a copy
+	
+	if (config.millisecsBetwQueueRuns === undefined) { //12/28/20 by DW
+		config.millisecsBetwQueueRuns = 100;
+		}
+	
+	
 	startQueryQueue ();
 	if (callback !== undefined) {
 		callback ();
