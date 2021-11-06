@@ -1,4 +1,4 @@
-const myProductName = "davesql", myVersion = "0.4.11"; 
+const myProductName = "davesql", myVersion = "0.4.12"; 
 
 exports.runSqltext = runSqltext; 
 exports.queueQuery = queueQuery; 

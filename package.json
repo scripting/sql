@@ -3,7 +3,7 @@
 	"description": "A simplified interface to run SQL code in my projects.",
 	"author": "Dave Winer <dave.winer@gmail.com>",
 	"license": "MIT",
-	"version": "0.4.11",
+	"version": "0.4.12",
 	"main": "davesql.js",
 	"files": [
 		"davesql.js"
@@ -14,7 +14,7 @@
 		},
 	"dependencies" : {
 		"daveutils": "*",
-		"dateformat": "*",
+		"dateformat": "4.5.1",
 		"mysql": "*"
 		}
 	}
