@@ -1,4 +1,4 @@
-const myProductName = "davesql", myVersion = "0.4.12"; 
+const myProductName = "davesql", myVersion = "0.4.14"; 
 
 exports.runSqltext = runSqltext; 
 exports.queueQuery = queueQuery; 
@@ -45,7 +45,7 @@ function encodeValues (values) {
 function runSqltext (s, callback) {
 	theSqlConnectionPool.getConnection (function (err, connection) {
 		if (err) {
-			console.log ("runSqltext: err.code == " + err.code + ", err.message == " + err.message + ", sqltext == " + s);
+			console.log ("runSqltext: err.code == " + err.code + ", err.message == " + err.message);
 			if (callback !== undefined) {
 				callback (err);
 				}
@@ -54,7 +54,7 @@ function runSqltext (s, callback) {
 			connection.query (s, function (err, result) {
 				connection.release ();
 				if (err) {
-					console.log ("runSqltext: err.code == " + err.code + ", err.message == " + err.message + ", sqltext == " + s);
+					console.log ("runSqltext: err.code == " + err.code + ", err.message == " + err.message);
 					if (callback !== undefined) {
 						callback (err);
 						}
