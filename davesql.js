@@ -1,4 +1,4 @@
-const myProductName = "davesql", myVersion = "0.4.14"; 
+const myProductName = "davesql", myVersion = "0.4.15"; 
 
 exports.runSqltext = runSqltext; 
 exports.queueQuery = queueQuery; 
@@ -51,7 +51,7 @@ function runSqltext (s, callback) {
 				}
 			}
 		else {
-			connection.query (s, function (err, result) {
+			connection.query (s, function (err, result, fields) {
 				connection.release ();
 				if (err) {
 					console.log ("runSqltext: err.code == " + err.code + ", err.message == " + err.message);
@@ -61,7 +61,7 @@ function runSqltext (s, callback) {
 					}
 				else {
 					if (callback !== undefined) {
-						callback (undefined, result);
+						callback (undefined, result, fields); //7/12/22 by DW
 						}
 					}
 				});
@@ -77,10 +77,10 @@ function checkQueryQueue () {
 		if (ctCurrentQueries < config.connectionLimit) {
 			const query = sqlQueue.shift ();
 			ctCurrentQueries++;
-			runSqltext (query.s, function (err, val) {
+			runSqltext (query.s, function (err, val, fields) {
 				ctCurrentQueries--;
 				if (query.callback !== undefined) {
-					query.callback (err, val);
+					query.callback (err, val, fields);
 					}
 				});
 			}
