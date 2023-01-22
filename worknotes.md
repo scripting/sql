@@ -1,3 +1,15 @@
+#### 1/9/23 by DW
+
+New config option -- config.flQueueAllRequests, default false.
+
+If true, all runSqltext requests go through queueQuery, so in theory we should never go over the connection limit.
+
+When running a query now, if running the query now would exceed the capacity of the connection pool, add it to the queue and leave.
+
+#### 1/8/23 by DW
+
+Support for a new option to log queries, flLogQueries. 
+
 #### 7/12/22 by DW -- 0.4.15
 
 Add a third callback param to runSqltext and queueQuery -- fields, which corresponds to the same value in the system routine.

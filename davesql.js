@@ -1,4 +1,4 @@
-const myProductName = "davesql", myVersion = "0.4.15"; 
+const myProductName = "davesql", myVersion = "0.4.22"; 
 
 exports.runSqltext = runSqltext; 
 exports.queueQuery = queueQuery; 
@@ -8,6 +8,7 @@ exports.encode = encode;
 exports.formatDateTime = formatDateTime; //12/18/20 by DW
 exports.start = start; 
 
+const utils = require ("daveutils");
 const mysql = require ("mysql");
 const dateFormat = require ("dateformat");
 
@@ -42,10 +43,15 @@ function encodeValues (values) {
 		}
 	return ("(" + part1 + ") values (" + part2 + ");");
 	}
-function runSqltext (s, callback) {
+function runQueryNow (s, callback) {
+	ctCurrentQueries++;
+	if (utils.getBoolean (config.flLogQueries)) {
+		console.log ("runQueryNow: " + s);
+		}
 	theSqlConnectionPool.getConnection (function (err, connection) {
 		if (err) {
-			console.log ("runSqltext: err.code == " + err.code + ", err.message == " + err.message);
+			ctCurrentQueries--;
+			console.log ("runQueryNow: err.code == " + err.code + ", err.message == " + err.message);
 			if (callback !== undefined) {
 				callback (err);
 				}
@@ -53,8 +59,9 @@ function runSqltext (s, callback) {
 		else {
 			connection.query (s, function (err, result, fields) {
 				connection.release ();
+				ctCurrentQueries--;
 				if (err) {
-					console.log ("runSqltext: err.code == " + err.code + ", err.message == " + err.message);
+					console.log ("runQueryNow: err.code == " + err.code + ", err.message == " + err.message);
 					if (callback !== undefined) {
 						callback (err);
 						}
@@ -68,6 +75,20 @@ function runSqltext (s, callback) {
 			}
 		});
 	}
+function runSqltext (s, callback) {
+	if (config.flQueueAllRequests) {
+		queueQuery (s, callback);
+		checkQueryQueue ();
+		}
+	else {
+		if (ctCurrentQueries >= config.connectionLimit) {
+			queueQuery (s, callback);
+			}
+		else {
+			runQueryNow (s, callback);
+			}
+		}
+	}
 
 function queueQuery (s, callback) {
 	sqlQueue.push ({s, callback});
@@ -76,9 +97,7 @@ function checkQueryQueue () {
 	if (sqlQueue.length > 0) {
 		if (ctCurrentQueries < config.connectionLimit) {
 			const query = sqlQueue.shift ();
-			ctCurrentQueries++;
-			runSqltext (query.s, function (err, val, fields) {
-				ctCurrentQueries--;
+			runQueryNow (query.s, function (err, val, fields) {
 				if (query.callback !== undefined) {
 					query.callback (err, val, fields);
 					}
@@ -95,14 +114,18 @@ function startQueryQueue () {
 
 function start (options, callback) {
 	theSqlConnectionPool = mysql.createPool (options);
+	
 	config = options; //keep a copy
 	
 	if (config.millisecsBetwQueueRuns === undefined) { //12/28/20 by DW
 		config.millisecsBetwQueueRuns = 100;
 		}
-	
+	if (config.flQueueAllRequests === undefined) { //1/9/23 by DW
+		config.flQueueAllRequests = false;
+		}
 	
 	startQueryQueue ();
+	
 	if (callback !== undefined) {
 		callback ();
 		}
