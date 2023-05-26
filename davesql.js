@@ -1,4 +1,4 @@
-const myProductName = "davesql", myVersion = "0.4.22"; 
+const myProductName = "davesql", myVersion = "0.4.25"; 
 
 exports.runSqltext = runSqltext; 
 exports.queueQuery = queueQuery; 
@@ -24,8 +24,15 @@ function formatDateTime (when) {
 		}
 	return (dateFormat (new Date (when), "yyyy-mm-dd HH:MM:ss"));
 	}
-function encode (s) {
-	return (mysql.escape (s));
+function encode (val) {
+	if ((typeof (val) != "object") || (val instanceof Date)) {
+		return (mysql.escape (val));
+		}
+	else {
+		let jsontext = JSON.stringify (val); //5/26/23 by DW
+		jsontext = utils.replaceAll (jsontext, "'", "\\'");
+		return ("'" + jsontext + "'");
+		}
 	}
 function encodeValues (values) {
 	var part1 = "", part2 = "";

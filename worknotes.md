@@ -1,3 +1,11 @@
+#### 5/26/23 by DW
+
+Escape single quotes in JSON objects. 
+
+#### 5/25/23 by DW
+
+When encoding an object that is not a date type, jsonStringify it. 
+
 #### 1/9/23 by DW
 
 New config option -- config.flQueueAllRequests, default false.
