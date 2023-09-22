@@ -1,4 +1,4 @@
-const myProductName = "davesql", myVersion = "0.4.25"; 
+const myProductName = "davesql", myVersion = "0.5.7"; 
 
 exports.runSqltext = runSqltext; 
 exports.queueQuery = queueQuery; 
@@ -12,7 +12,8 @@ const utils = require ("daveutils");
 const mysql = require ("mysql");
 const dateFormat = require ("dateformat");
 
-var config;
+const config = new Object (); //9/22/23 by DW -- changed to const
+
 var theSqlConnection = undefined;
 var theSqlConnectionPool = undefined; 
 var sqlQueue = new Array ();
@@ -51,6 +52,20 @@ function encodeValues (values) {
 	return ("(" + part1 + ") values (" + part2 + ");");
 	}
 function runQueryNow (s, callback) {
+	const whenstart = new Date ();
+	
+	function callLogCallback (err, result) { //9/21/23 by DW
+		if (config.logCallback !== undefined) { 
+			const theDataForCall = {
+				err,
+				result,
+				sqltext: s,
+				ctsecs: utils.secondsSince (whenstart)
+				};
+			config.logCallback (theDataForCall);
+			}
+		}
+	
 	ctCurrentQueries++;
 	if (utils.getBoolean (config.flLogQueries)) {
 		console.log ("runQueryNow: " + s);
@@ -62,6 +77,7 @@ function runQueryNow (s, callback) {
 			if (callback !== undefined) {
 				callback (err);
 				}
+			callLogCallback (err); //9/21/23 by DW
 			}
 		else {
 			connection.query (s, function (err, result, fields) {
@@ -72,17 +88,24 @@ function runQueryNow (s, callback) {
 					if (callback !== undefined) {
 						callback (err);
 						}
+					callLogCallback (err); //9/21/23 by DW
 					}
 				else {
 					if (callback !== undefined) {
 						callback (undefined, result, fields); //7/12/22 by DW
 						}
+					callLogCallback (undefined, result); //9/21/23 by DW
 					}
 				});
 			}
 		});
 	}
 function runSqltext (s, callback) {
+	
+	if (config === undefined) { //9/22/23 by DW
+		debugger;
+		}
+	
 	if (config.flQueueAllRequests) {
 		queueQuery (s, callback);
 		checkQueryQueue ();
@@ -119,10 +142,14 @@ function startQueryQueue () {
 	setInterval (checkQueryQueue, config.millisecsBetwQueueRuns); //every tenth second
 	}
 
+
+
 function start (options, callback) {
 	theSqlConnectionPool = mysql.createPool (options);
 	
-	config = options; //keep a copy
+	for (var x in options) { //9/22/23 by DW
+		config [x] = options [x];
+		}
 	
 	if (config.millisecsBetwQueueRuns === undefined) { //12/28/20 by DW
 		config.millisecsBetwQueueRuns = 100;
