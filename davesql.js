@@ -1,4 +1,4 @@
-const myProductName = "davesql", myVersion = "0.5.7"; 
+const myProductName = "davesql", myVersion = "0.6.0"; 
 
 exports.runSqltext = runSqltext; 
 exports.queueQuery = queueQuery; 
@@ -9,8 +9,8 @@ exports.formatDateTime = formatDateTime; //12/18/20 by DW
 exports.start = start; 
 
 const utils = require ("daveutils");
-const mysql = require ("mysql");
 const dateFormat = require ("dateformat");
+var mysql;
 
 const config = new Object (); //9/22/23 by DW -- changed to const
 
@@ -145,18 +145,23 @@ function startQueryQueue () {
 
 
 function start (options, callback) {
-	theSqlConnectionPool = mysql.createPool (options);
-	
 	for (var x in options) { //9/22/23 by DW
 		config [x] = options [x];
 		}
-	
 	if (config.millisecsBetwQueueRuns === undefined) { //12/28/20 by DW
 		config.millisecsBetwQueueRuns = 100;
 		}
 	if (config.flQueueAllRequests === undefined) { //1/9/23 by DW
 		config.flQueueAllRequests = false;
 		}
+	if (config.flUseMySql2 === undefined) { //4/12/24 by DW
+		config.flUseMySql2 = false;
+		}
+	
+	console.log ("davesql.start: using " + ((config.flUseMySql2) ? "mysql2" : "mysql") + "."); //4/12/24 by DW
+	mysql = (config.flUseMySql2) ? require ("mysql2") : require ("mysql"); //4/12/24 by DW
+	
+	theSqlConnectionPool = mysql.createPool (options);
 	
 	startQueryQueue ();
 	
