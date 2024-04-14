@@ -1,12 +1,12 @@
 #### 4/12/24 by DW
 
-Let's try an experiment. 
-
 Added a dependency for <a href="https://www.npmjs.com/package/mysql2">mysql2</a>.
 
 Instead of initializing mysql at the top, we do it after we are started.
 
 The caller can choose to use mysql2 by passing as an option, flUseMySql2, set true.
+
+I tested it on one of my test FeedLand servers and it appears to work. 
 
 #### 5/26/23 by DW
 
