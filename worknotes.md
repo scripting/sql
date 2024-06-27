@@ -1,3 +1,9 @@
+#### 6/27/24 by DW
+
+There was breakage in transition from mysql to mysql2. Apparently when you have a value of type JSON in a cell, when a query returns that value, it is parsed when you receive it. In mysql it came back as a string. This was a breaking change and should have been flagged in red somewhere so you didn't have to find out about it 3 months later with deeply buried bugs. Luckily they provide a flag to turn this bug off. 
+
+Look in `start` for the change. 
+
 #### 4/12/24 by DW
 
 Added a dependency for <a href="https://www.npmjs.com/package/mysql2">mysql2</a>.

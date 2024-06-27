@@ -1,4 +1,4 @@
-const myProductName = "davesql", myVersion = "0.6.0"; 
+const myProductName = "davesql", myVersion = "0.6.2"; 
 
 exports.runSqltext = runSqltext; 
 exports.queueQuery = queueQuery; 
@@ -160,6 +160,10 @@ function start (options, callback) {
 	
 	console.log ("davesql.start: using " + ((config.flUseMySql2) ? "mysql2" : "mysql") + "."); //4/12/24 by DW
 	mysql = (config.flUseMySql2) ? require ("mysql2") : require ("mysql"); //4/12/24 by DW
+	
+	if (config.flUseMySql2) { //6/27/24 by DW
+		options.jsonStrings = true;
+		}
 	
 	theSqlConnectionPool = mysql.createPool (options);
 	
